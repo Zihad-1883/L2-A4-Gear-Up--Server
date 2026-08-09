@@ -8,6 +8,7 @@ import { reviewController } from "../review/review.controller";
 const providerRouter = Router();
 const gearRouter = Router()
 
+providerRouter.get("/", auth(Role.PROVIDER), gearItemController.getProvidersGearItems);
 providerRouter.post("/", auth(Role.PROVIDER), gearItemController.createGearItem);
 providerRouter.patch("/:gearId", auth(Role.PROVIDER), gearItemController.updateGearItem);
 providerRouter.delete("/:gearId", auth(Role.PROVIDER), gearItemController.deleteGearItem);

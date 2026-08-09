@@ -160,10 +160,105 @@ const deleteGearItemFromDB = async (gearId: string, userId: string) => {
     return null
 }
 
+const getProvidersGearItemsFromDB = async (providerId: string, query: IGearItemQuery = {}) => {
+    const { categoryId, search, maxPrice, minPrice, brand, stock, limit, page, sortBy, sortOrder } = query;
+
+    const paginationLimit = limit ? Number(limit) : 5;
+    const paginationPage = page ? Number(page) : 1;
+    const skip = (paginationPage - 1) * paginationLimit;
+
+    const sortingOrder = sortOrder ? sortOrder : "desc";
+    const sortingBy = sortBy ? sortBy : "createdAt";
+
+    const andCondition: Prisma.GearItemWhereInput[] = [
+        {
+            userId: providerId
+        }
+    ]
+
+    if (categoryId) {
+        andCondition.push({
+            categoryId: categoryId
+        })
+    }
+
+    if (search) {
+        andCondition.push({
+            OR: [
+                {
+                    name: {
+                        contains: search,
+                        mode: "insensitive"
+                    }
+                },
+                {
+                    description: {
+                        contains: search,
+                        mode: "insensitive"
+                    }
+                },
+                {
+                    brand: {
+                        contains: search,
+                        mode: "insensitive"
+                    }
+                },
+            ]
+        })
+    }
+
+    if (maxPrice || minPrice) {
+        andCondition.push({
+            price: {
+                ...(maxPrice && { lte: Number(maxPrice) }),
+                ...(minPrice && { gte: Number(minPrice) }),
+            }
+        })
+    }
+
+    if (brand) {
+        andCondition.push({
+            brand: brand
+        })
+    }
+
+    if (stock) {
+        andCondition.push({
+            stock: {
+                gte: Number(stock)
+            }
+        })
+    }
+
+    const total = await prisma.gearItem.count({
+        where: {
+            AND: andCondition
+        }
+    });
+
+    const result = await prisma.gearItem.findMany({
+        where: {
+            AND: andCondition
+        },
+
+        take: paginationLimit,
+        skip: skip,
+        orderBy: {
+            [sortingBy]: sortingOrder
+        },
+
+        include: {
+            category: true
+        }
+    })
+    return { result, page: paginationPage, limit: paginationLimit, total };
+}
+
 export const gearItemService = {
     createGearItemInDB,
     getAllGearItemsFromDB,
     getSingleGearItemFromDB,
     updateGearItemInDB,
-    deleteGearItemFromDB
+    deleteGearItemFromDB,
+    getProvidersGearItemsFromDB
 }

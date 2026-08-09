@@ -71,12 +71,33 @@ const deleteGearItem = catchAsync(async (req: Request, res: Response, next: Next
     })
 })
 
+const getProvidersGearItems = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const providerId = req.user?.id;
+    if (!providerId) {
+        throw new Error("Provider ID is required");
+    }
+    const query = req.query;
+    const data = await gearItemService.getProvidersGearItemsFromDB(providerId, query);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Provider Gear Items fetched successfully",
+        data: data.result,
+        meta: {
+            page: Number(data.page),
+            limit: Number(data.limit),
+            total: Number(data.total)
+        }
+    })
+})
+
 export const gearItemController = {
     createGearItem,
     getAllGearItems,
     getSingleGearItem,
     updateGearItem,
-    deleteGearItem
+    deleteGearItem,
+    getProvidersGearItems
 }
 
 
