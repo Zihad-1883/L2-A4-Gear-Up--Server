@@ -9,7 +9,7 @@ const router = Router();
 router.post("/create", auth(Role.CUSTOMER), paymentsController.initiatePayment);
 
 // Confirm/verify payment (webhook or callback)
-router.post("/confirm", paymentsController.handleWebhook);
+router.post("/confirm", paymentsController.confirmPayment);
 router.post("/webhook", paymentsController.handleWebhook);
 router.post("/success", paymentsController.handleSuccessRedirect);
 router.post("/fail", paymentsController.handleFailRedirect);

@@ -21,15 +21,16 @@ const initiatePaymentIntoDB = async (rentalOrderId: string, customerId: string) 
     }
 
     const transactionId = `TRAN_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+    const backendUrl = process.env.BACKEND_URL || config.BACKEND_URL || "https://gearup-backend-4eca.onrender.com";
 
     const paymentData = {
         total_amount: Number(rentalOrder.totalPrice),
         currency: "BDT",
         tran_id: transactionId,
-        success_url: `${config.APP_URL}/api/payments/confirm`,
-        fail_url: `${config.APP_URL}/api/payments/fail`,
-        cancel_url: `${config.APP_URL}/api/payments/cancel`,
-        ipn_url: `${config.APP_URL}/api/payments/confirm`,
+        success_url: `${backendUrl}/api/payments/confirm`,
+        fail_url: `${backendUrl}/api/payments/confirm`,
+        cancel_url: `${backendUrl}/api/payments/confirm`,
+        ipn_url: `${backendUrl}/api/payments/confirm`,
         shipping_method: "Courier",
         product_name: rentalOrder.gearItem?.name || "Gear Rental",
         product_category: "Sports Equipment",

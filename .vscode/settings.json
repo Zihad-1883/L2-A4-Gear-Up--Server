@@ -1,0 +1,9 @@
+{
+  "prisma.schema": "prisma/schema",
+  "files.exclude": {
+    "**/prisma/src/generated": true
+  },
+  "search.exclude": {
+    "**/prisma/src/generated": true
+  }
+}

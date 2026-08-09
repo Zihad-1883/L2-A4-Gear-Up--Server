@@ -4,6 +4,8 @@ import { paymentsService } from "./payments.service";
 import { sendResponse } from "../../utilis/sendResponse";
 import httpStatus from "http-status";
 
+import config from "../../config";
+
 const initiatePayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { rentalOrderId } = req.body;
     const customerId = req.user?.id as string;
@@ -22,6 +24,24 @@ const initiatePayment = catchAsync(async (req: Request, res: Response, next: Nex
     });
 });
 
+const confirmPayment = async (req: Request, res: Response) => {
+    try {
+        const payload = req.body;
+        const result = await paymentsService.validatePaymentInDB(payload);
+        const frontendUrl = process.env.FRONTEND_URL || config.FRONTEND_URL || "http://localhost:3000";
+
+        if (result && result.paymentStatus === "COMPLETED") {
+            return res.redirect(`${frontendUrl}/dashboard/customer/orders?payment=success`);
+        } else {
+            return res.redirect(`${frontendUrl}/dashboard/customer/orders?payment=failed`);
+        }
+    } catch (error) {
+        console.error("Payment confirmation error:", error);
+        const frontendUrl = process.env.FRONTEND_URL || config.FRONTEND_URL || "http://localhost:3000";
+        return res.redirect(`${frontendUrl}/dashboard/customer/orders?payment=error`);
+    }
+};
+
 const handleWebhook = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
     const result = await paymentsService.validatePaymentInDB(payload);
@@ -34,19 +54,9 @@ const handleWebhook = catchAsync(async (req: Request, res: Response, next: NextF
     });
 });
 
-const handleSuccessRedirect = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const payload = req.body;
-    await paymentsService.validatePaymentInDB(payload);
-    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/success`);
-});
-
-const handleFailRedirect = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/fail`);
-});
-
-const handleCancelRedirect = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    res.redirect(`${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/cancel`);
-});
+const handleSuccessRedirect = confirmPayment;
+const handleFailRedirect = confirmPayment;
+const handleCancelRedirect = confirmPayment;
 
 const getMyPaymentHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const customerId = req.user?.id as string;
@@ -76,6 +86,7 @@ const getSinglePaymentDetails = catchAsync(async (req: Request, res: Response, n
 
 export const paymentsController = {
     initiatePayment,
+    confirmPayment,
     handleWebhook,
     handleSuccessRedirect,
     handleFailRedirect,

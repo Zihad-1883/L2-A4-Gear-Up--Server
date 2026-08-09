@@ -5,6 +5,7 @@ export interface IGearItem {
     price: number;
     stock: number;
     categoryId: string;
+    photoUrl?: string;
 }
 
 export interface IGearItemQuery {

@@ -4,7 +4,7 @@ dns.setDefaultResultOrder("ipv4first");
 import "dotenv/config";
 import pg from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, Prisma, Role } from "../../prisma/src/generated/prisma/index.js";
+import { PrismaClient, Prisma, Role } from "../generated/prisma/index.js";
 import config from "../config";
 
 const connectionString = process.env.DATABASE_URL || config.DATABASE_URL;

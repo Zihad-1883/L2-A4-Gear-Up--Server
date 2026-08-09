@@ -5,6 +5,7 @@ model GearItem {
     brand       String
     price       Decimal @db.Decimal(10, 2)
     stock       Int     @default(0)
+    photoUrl    String?
 
     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId String
